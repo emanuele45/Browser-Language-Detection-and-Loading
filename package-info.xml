@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!DOCTYPE package-info SYSTEM "http://www.simplemachines.org/xml/package-info">
+<package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
+	<id>Emanuele:browserlang</id>
+	<name>Browser Language</name>
+	<version>0.1.0</version>
+	<type>modification</type>
+
+	<install for="2.0 RC5">
+		<database>install.php</database>
+		<redirect url="?action=metagal_admin">You have to enable the option first</redirect>
+	</install>
+
+	<uninstall for="2.0 RC5">
+		<database reverse="true">install.php</database>
+	</uninstall>
+</package-info>
