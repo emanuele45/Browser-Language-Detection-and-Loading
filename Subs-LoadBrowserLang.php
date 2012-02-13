@@ -1,8 +1,20 @@
 <?php
+/**
+ * Browser Language Detection and Loading (BLDL)
+ *
+ * @package BLDL
+ * @author emanuele
+ * @copyright 2012 emanuele, Simple Machines
+ * @license http://www.simplemachines.org/about/smf/license.php BSD
+ *
+ * @version 0.1.0
+ */
+
 if (!defined('SMF'))
 	die('Hacking attempt...');
 
-function browserlang_check_n_load(){
+function browserlang_check_n_load ()
+{
 	global $settings, $languages_array;
 
 	$languages_array = array(
@@ -29,7 +41,7 @@ function browserlang_check_n_load(){
 			'fr-fr' => 'French',
 			'gl-es' => 'Galician',
 			'gl' => 'Galician',
-			'de-de' => 'German',// 'German_informal'),
+			'de-de' => 'German',// 'German_informal',
 			'el-gr' => 'Greek',
 			'el' => 'Greek',
 			'he-il' => 'Hebrew',
@@ -81,30 +93,39 @@ function browserlang_check_n_load(){
 	// en,en-us;q=0.8,it-it;q=0.5,it;q=0.3
 	$browser_langs = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
 
-	foreach($browser_langs as &$lang){
+	foreach ($browser_langs as &$lang)
+	{
 		$lang = strtolower(substr($lang, 0, strstr($lang, ';') ? strpos($lang, ';') : strlen($lang)));
-		echo $lang . '|<br />';
-		if(array_key_exists($lang, $languages_array)){echo strtolower($languages_array[$lang])."|<br />";
-			if(browserlang_file_exists($lang))
-				return true;
-		} elseif(array_key_exists($lang . '-' . $lang, $languages_array)){
-			if(browserlang_file_exists($lang . '-' . $lang))
-				return true;
-		}
+
+		$lang_check = array_key_exists($lang, $languages_array) ? $lang : (array_key_exists($lang . '-' . $lang, $languages_array) ? $lang . '-' . $lang : false);
+		if (!empty($lang_check) && browserlang_file_exists($lang_check, strtolower($languages_array[$lang_check])))
+				break;
 	}
 }
 
-function browserlang_file_exists($lang){
-	global $language, $settings, $languages_array, $user_info;
-// 	print_r($user_info);
-	echo $settings['default_theme_dir'] . '/languages/index.' . strtolower($languages_array[$lang]) . '.php<br />';
-	if(file_exists($settings['default_theme_dir'] . '/languages/index.' . strtolower($languages_array[$lang]) . '.php')){
-		$language = $languages_array[$lang];echo "A";
-		return true;
-	}elseif($lang=='cs' || $lang=='cs-cz' || $lang=='de-de'){
-		if(file_exists($settings['default_theme_dir'] . '/languages/index.' . strtolower($languages_array[$lang]) . '_informal.php'))
-			$language = $languages_array[$lang];
-		return true;
+function browserlang_file_exists ($lang, $lang_name)
+{
+	global $cookiename, $modSettings, $language, $settings, $txt;
+
+	$character_set = empty($modSettings['global_character_set']) ? (empty($txt['lang_character_set']) ? 'ISO-8859-1' : $txt['lang_character_set']) : $modSettings['global_character_set'];
+	$utf8 = $character_set == 'UTF-8' ? true : false;
+	$lang_name =  $lang_name . ($utf8 ? '-utf8' : '');
+	$informal = ($lang=='cs' || $lang=='cs-cz' || $lang=='de-de') ? '_informal' : '';
+
+	if (empty($settings['default_theme_dir']))
+		loadTheme(0, false);
+
+	if (file_exists($settings['default_theme_dir'] . '/languages/index.' . $lang_name . $informal .'.php') || (($lang = 'en' || $lang = 'en-us' || $lang = 'en-gb') && file_exists($settings['default_theme_dir'] . '/languages/index.english.php')))
+	{
+		if (isset($_SESSION['login_' . $cookiename]))
+			$session_data = unserialize($_SESSION['login_' . $cookiename]);
+		if (empty($session_data[0]) && empty($_SESSION['language']))
+		{
+			$language = $lang_name;
+			return true;
+		}
 	}
+
+	return false;
 }
 ?>
