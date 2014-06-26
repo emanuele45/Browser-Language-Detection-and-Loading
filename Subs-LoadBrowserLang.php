@@ -13,10 +13,8 @@
 if (!defined('SMF'))
 	die('Hacking attempt...');
 
-function browserlang_check_n_load ()
+function browserlang_check_n_load()
 {
-	global $settings, $languages_array;
-
 	$languages_array = array(
 			'sq-al' => 'Albanian',
 			'sq' => 'Albanian',
@@ -103,9 +101,9 @@ function browserlang_check_n_load ()
 	}
 }
 
-function browserlang_file_exists ($lang, $lang_name)
+function browserlang_file_exists($lang, $lang_name)
 {
-	global $cookiename, $modSettings, $language, $settings, $txt;
+	global $cookiename, $modSettings, $user_settings, $settings, $txt;
 
 	$character_set = empty($modSettings['global_character_set']) ? (empty($txt['lang_character_set']) ? 'ISO-8859-1' : $txt['lang_character_set']) : $modSettings['global_character_set'];
 	$utf8 = $character_set == 'UTF-8' ? true : false;
@@ -121,7 +119,7 @@ function browserlang_file_exists ($lang, $lang_name)
 			$session_data = unserialize($_SESSION['login_' . $cookiename]);
 		if (empty($session_data[0]) && empty($_SESSION['language']))
 		{
-			$language = $lang_name;
+			$user_settings['lngfile'] = $lang_name;
 			return true;
 		}
 	}
